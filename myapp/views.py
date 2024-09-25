@@ -73,6 +73,72 @@ class UserDetailView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
 
+from rest_framework import generics
+from .models import UserData
+from .serializers import UserDataSerializer
+'''
+class UserDataCreateAPIView(generics.CreateAPIView):
+    queryset = UserData.objects.all()
+    serializer_class = UserDataSerializer
+'''
+
+
+from rest_framework import generics
+from rest_framework.response import Response
+from .models import UserData
+from .serializers import UserDataSerializer
+
+def my_script(data):
+    # Logica dello script che ritorna True se ha esito positivo, False altrimenti
+    success = "some_processing_function(data)"
+    print("okj")
+    return success
+
+'''class UserDataCreateAPIView(generics.CreateAPIView):
+    queryset = UserData.objects.all()
+    serializer_class = UserDataSerializer
+
+    def perform_create(self, serializer):
+        instance = serializer.save()  # Salva i dati del modello
+        script_success = my_script(instance)  # Esegue lo script e controlla l'esito
+
+        # Salva il risultato dello script nel modello, se necessario
+        instance.script_success = script_success
+        instance.save()
+
+        # Aggiunge l'esito dello script al contesto della risposta
+        self.script_success = script_success
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)  # Esegue la logica di creazione standard
+
+        # Modifica la risposta in base all'esito dello script
+        if self.script_success:
+            response.data['message'] = 'Script executed successfully!'
+        else:
+            response.data['message'] = 'Script failed to execute properly.'
+
+        return response
+'''
+from rest_framework import generics, status
+from rest_framework.response import Response
+from .models import UserData
+from .serializers import UserDataSerializer
+
+class UserDataCreateAPIView(generics.CreateAPIView):
+    queryset = UserData.objects.all()
+    serializer_class = UserDataSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response({'message': 'Dati ricevuti e script eseguito con successo!'}, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 def map(request):
         lat_min, lat_max = 45.1376, 45.1776  # Limiti per la latitudine

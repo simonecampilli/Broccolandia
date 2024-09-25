@@ -4,15 +4,22 @@ from rest_framework.routers import DefaultRouter
 from . import views
 from .views import UserDataViewSet
 from .views import UserDataCreate, UserOwnDataView, UserDetailView
+from .views import UserDataCreateAPIView
+
 router = DefaultRouter()
 router.register(r'userdata', UserDataViewSet)
 
+
 urlpatterns = [
+
+    path('get_map',views.map,name='map'),
+
     path('', include(router.urls)),
-    path('create/', UserDataCreate.as_view(), name='create-userdata'),
+    #path('create/', UserDataCreate.as_view(), name='create-userdata'),
     path('mydata/', UserOwnDataView.as_view(), name='my-data'),
     path('user/details/', UserDetailView.as_view(), name='user-details'),
-    path('get_map',views.map,name='map'),
+    path('user/details/', UserDetailView.as_view(), name='user-details'),
+    path('api/userdata/', UserDataCreateAPIView.as_view(), name='create_userdata'),
 
 
 ]
