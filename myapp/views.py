@@ -126,7 +126,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import UserData
 from .serializers import UserDataSerializer
-
+'''
 class UserDataCreateAPIView(generics.CreateAPIView):
     queryset = UserData.objects.all()
     serializer_class = UserDataSerializer
@@ -140,6 +140,40 @@ class UserDataCreateAPIView(generics.CreateAPIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+'''
+from rest_framework import generics, status
+from rest_framework.response import Response
+from .models import UserData
+from .serializers import UserDataSerializer
+
+class UserDataCreateAPIView(generics.CreateAPIView):
+    queryset = UserData.objects.all()
+    serializer_class = UserDataSerializer
+
+    def perform_create(self, serializer):
+        instance = serializer.save()  # Salva i dati del modello
+        script_success = self.execute_script(instance)  # Esegue lo script e controlla l'esito
+
+        # Salva il risultato dello script nel modello, se necessario
+        # instance.script_success = script_success
+        # instance.save()
+
+        # Aggiunge l'esito dello script al contesto della risposta
+        self.script_success = script_success
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)  # Esegue la logica di creazione standard
+        # Aggiungi il messaggio personalizzato al corpo della risposta
+        if self.script_success:
+            response.data['message'] = 'Script andato a buon fine!'
+        else:
+            response.data['message'] = 'Script fallito.'
+        return response
+
+    def execute_script(self, instance):
+        # Qui inserisci la logica del tuo script
+        # Ritorna True se lo script è un successo, False altrimenti
+        return True  # O la logica reale del tuo script
 
 
 def map(request):
