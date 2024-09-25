@@ -1,3 +1,5 @@
+import random
+
 from rest_framework import viewsets
 from .models import UserData
 from .serializers import UserDataSerializer
@@ -69,3 +71,21 @@ class UserDetailView(LoginRequiredMixin, View):
             'user_data': user_data
         }
         return render(request, self.template_name, context)
+
+
+
+def map(request):
+        lat_min, lat_max = 45.1376, 45.1776  # Limiti per la latitudine
+        lon_min, lon_max = 10.7714, 10.8114  # Limiti per la longitudine
+
+        points = []
+        for _ in range(100):
+            lat = random.uniform(lat_min, lat_max)
+            lon = random.uniform(lon_min, lon_max)
+            color = random.choice(["red", "green"])  # Colore casuale tra rosso e verde
+            points.append({"lat": lat, "lon": lon, "color": color})
+
+
+
+# Genera 100 punti casuali
+        return render(request,'map.html',{'points':points})
