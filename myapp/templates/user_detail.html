@@ -1,0 +1,11 @@
+<!-- user_detail.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Informazioni Utente</h2>
+<div>
+    <p>Username: {{ user_data.user.username }}</p>
+    <p>Email: {{ user_data.user.email }}</p>
+    <!-- Aggiungi altri campi di UserData che vuoi mostrare -->
+</div>
+{% endblock %}
