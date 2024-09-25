@@ -1,5 +1,7 @@
 import random
 
+import pandas as pd
+from django.http import JsonResponse
 from rest_framework import viewsets
 from .models import UserData
 from .serializers import UserDataSerializer
@@ -145,13 +147,14 @@ def map(request):
         lon_min, lon_max = 10.7714, 10.8114  # Limiti per la longitudine
 
         points = []
-        for _ in range(100):
-            lat = random.uniform(lat_min, lat_max)
-            lon = random.uniform(lon_min, lon_max)
+        df = pd.read_excel('/Users/michelemenabeni/PycharmProjects/AQA/Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx')
+        print(df.columns)
+        df=df.head(1000)
+        df = df.dropna(subset=['Latitude', 'Longitude'])
+        for index,row in df.iterrows():
+            #lat = random.uniform(lat_min, lat_max)
+            #lon = random.uniform(lon_min, lon_max)
             color = random.choice(["red", "green"])  # Colore casuale tra rosso e verde
-            points.append({"lat": lat, "lon": lon, "color": color})
-
-
-
-# Genera 100 punti casuali
+            points.append({"lat": row['Latitude'], "lon": row['Longitude'], "color": color})
         return render(request,'map.html',{'points':points})
+

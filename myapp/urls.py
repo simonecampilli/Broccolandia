@@ -21,5 +21,4 @@ urlpatterns = [
     path('user/details/', UserDetailView.as_view(), name='user-details'),
     path('api/userdata/', UserDataCreateAPIView.as_view(), name='create_userdata'),
 
-
 ]

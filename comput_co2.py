@@ -27,7 +27,7 @@ def calcola_emissioni_per_operatore(df, fattore_emissione_g_km=120):
         for i in range(1, len(punti)):
             distanza_km = calcola_distanza(punti[i - 1], punti[i])
             emissioni_totali += distanza_km * fattore_emissione_g_km / 1000  # Emissioni in kg
-            distanza+=distanza_km
+            distanza += distanza_km
 
         emissioni_giornaliere[(operatore, data)] = {'em':emissioni_totali,'dist':distanza}
 
