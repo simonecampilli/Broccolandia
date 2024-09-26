@@ -187,7 +187,7 @@ def map(request):
     df = pd.DataFrame(list(queryset))
     df_ok = df[df['flag'] !=True].sort_values(by='data_lettura')
     print(df_ok)
-    current_route_coords,optimized_route_coords=calcola_primi_100_consumo_attuale(df_ok)
+    current_route_coords,optimized_route_coords,emissioni_correnti,emissioni_proposta,distanza_corrente,distanza_proposta = calcola_primi_100_consumo_attuale(df_ok)
 
     # Fetch all entries from the UserData model
     user_data_entries = UserData.objects.all()

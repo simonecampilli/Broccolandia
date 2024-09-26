@@ -1,14 +1,10 @@
-import numpy as np
-import pandas as pd
-import geopy.distance
-from ortools.constraint_solver import routing_enums_pb2
-from ortools.constraint_solver import pywrapcp
 from geopy.distance import geodesic
-from scipy.spatial.distance import pdist, squareform
-import mapboxgl
-from mapboxgl.utils import df_to_geojson
+from ortools.constraint_solver import routing_enums_pb2
 from mapboxgl.viz import LinestringViz
-import os
+from ortools.constraint_solver import pywrapcp
+from ortools.constraint_solver import routing_enums_pb2
+from scipy.spatial.distance import pdist, squareform
+
 
 # 1. Read the Excel file
 #df = pd.read_excel('Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx')
@@ -123,7 +119,7 @@ def calcola_primi_100_consumo_attuale(df1):
     print('Metodo attuale:', emissioni_totali, 'kg CO₂ per una distanza di km:', distanza)
 
     # Plot the routes
-    return current_route_coords, optimized_route_coords
+    return current_route_coords, optimized_route_coords, emissioni_totali, emissioni_proposte, distanza, dist_prop_km
 
 # 7. Function to plot the routes using Mapbox
 def plot_routes(current_route_coords, optimized_route_coords):
