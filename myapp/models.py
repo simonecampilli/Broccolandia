@@ -19,6 +19,7 @@ class UserData(models.Model):
     lettura3 = models.IntegerField(blank=True, null=True)
     link_map = models.URLField(max_length=500, blank=True, null=True)
     flag = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='images/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.comune} - {self.indirizzo}"

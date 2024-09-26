@@ -25,7 +25,7 @@ class UserDataSerializer(serializers.ModelSerializer):
         fields = [
             'comune', 'indirizzo', 'civ', 'codice_letturista', 'data_lettura',
             'ora_lettura', 'latitude', 'longitude', 'altitude', 'lettura1',
-            'lettura2', 'lettura3', 'link_map', 'flag'
+            'lettura2', 'lettura3', 'link_map', 'flag','image'
         ]
 
     def create(self, validated_data):
