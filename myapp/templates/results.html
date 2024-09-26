@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results of Image Detection</title>
+</head>
+<body>
+    <h1>Results of Image Detection</h1>
+    {% for image, numbers, image_path in results %}
+    <div>
+        <h3>{{ image }}</h3>
+        <p>Detected Numbers: {{ numbers }}</p>
+        <img src="{{ image_path }}" alt="Processed Image" style="width: 100%; max-width: 600px;">
+    </div>
+    {% endfor %}
+</body>
+</html>

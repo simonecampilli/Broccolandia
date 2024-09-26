@@ -267,3 +267,49 @@ def import_user_data(request):
         return HttpResponse("Data import completed successfully!")
     except Exception as e:
         return HttpResponse(f"An error occurred: {e}")
+'''
+import os
+import torch
+from django.conf import settings
+from ultralytics import YOLO
+
+def sort_tensor_by_x1(data, cls):
+    sorted_data, indices = torch.sort(data[:, 0], dim=0)
+    sorted_cls = cls[indices]
+    return sorted_cls
+
+def detect_numbers(img):
+    model = YOLO('best.pt')
+    result_obj_det = model(img)
+
+    boxes = None
+    for result in result_obj_det:
+        boxes = result.boxes
+
+        # Assicurati che la cartella 'yolo' esista all'interno di MEDIA_ROOT
+        save_directory = os.path.join(settings.MEDIA_ROOT, 'yolo')
+        if not os.path.exists(save_directory):
+            os.makedirs(save_directory)
+
+        # Crea il percorso di salvataggio nell'ambito MEDIA_ROOT
+        save_path = os.path.join(save_directory, os.path.basename(img))
+        # Salva l'immagine con annotazioni nel percorso desiderato
+        result.save(save_path)
+
+    if boxes is not None:
+        # Estrai il percorso relativo per l'uso nel template
+        rel_save_path = os.path.join(settings.MEDIA_URL, 'yolo', os.path.basename(img))
+        numbers = sort_tensor_by_x1(boxes.data, boxes.cls)
+        return numbers, rel_save_path
+    else:
+        return "ErrorImage", None
+
+def detection_view(request):
+    directory = os.path.join(settings.MEDIA_ROOT, 'testProva')
+    results = []
+    for image in os.listdir(directory):
+        numbers, image_path = detect_numbers(os.path.join(directory, image))
+        results.append((image, numbers, image_path))
+    return render(request, 'results.html', {'results': results})
+
+'''
