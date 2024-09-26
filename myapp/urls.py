@@ -23,4 +23,5 @@ urlpatterns = [
     #path('detect/', views.detection_view, name='detect'),
     path('dettaglio/<int:id>/', views.dettaglio, name='dettaglio'),
 
+
 ]
