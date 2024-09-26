@@ -194,7 +194,7 @@ def map(request):
     # Prepare the points to pass to the template
     points = []
     for entry in UserData.objects.all():
-        color = 'green' if not entry.flag else 'red'
+        color = 'green' if entry.flag else 'red'
         points.append({
             "id": entry.id,  # Include ID to make the point clickable
             "lat": entry.latitude,
