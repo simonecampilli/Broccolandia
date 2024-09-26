@@ -1,63 +1,158 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Map View with Mapbox</title>
+    <title>Confronto Mappe con Mapbox</title>
+    <!-- Mapbox GL JS CSS -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
+    <!-- Mapbox GL Compare CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; }
-        #map { width: 100%; height: 600px; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Roboto', sans-serif;
+        }
+        #header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        #map-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+        }
+        #map1, #map2 {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        #legend {
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            font-family: 'Roboto', sans-serif;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #legend h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+        #legend ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #legend li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        #legend span {
+            display: inline-block;
+            width: 25px;
+            height: 12px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
-    <div id="map"></div>
+    <div id="header">
+        <h1>Confronto Rotte: Attuale vs Ottimizzata</h1>
+    </div>
+    <div id="map-container">
+        <div id="map1"></div>
+        <div id="map2"></div>
+    </div>
+    <div id="legend">
+        <h3>Legenda</h3>
+        <ul>
+            <li><span style="background-color: #0000ff;"></span> Rotta Attuale</li>
+            <li><span style="background-color: #ff0000;"></span> Rotta Ottimizzata</li>
+            <li><span style="background-color: #00ff00;"></span> Punti di Interesse</li>
+        </ul>
+    </div>
 
+    <!-- Mapbox GL JS -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <!-- Mapbox GL Compare JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.js"></script>
     <script>
         // Access token
         mapboxgl.accessToken = 'pk.eyJ1IjoibWlraW1lbmEwMSIsImEiOiJjbTBsNmVuZTUwMmhzMmtzN3AycmhtZTV6In0.Vq9BcjFL6SLom-YwELw19w';
 
-        // Inizializza la mappa
-        var map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [9.191383, 45.464211], // Centra sulla posizione iniziale
+        // Inizializza la mappa corrente
+        var map1 = new mapboxgl.Map({
+            container: 'map1',
+            style: 'mapbox://styles/mapbox/light-v10',
+            center: [10.5003, 45.3876],
             zoom: 12
         });
 
-        // Aggiungi i punti alla mappa
-        var points = {{ points|safe }};
-        points.forEach(function(point) {
-            // Crea un marker per ogni punto
-            var marker = new mapboxgl.Marker({ color: point.color })
-                .setLngLat([point.lon, point.lat])
-                .addTo(map);
-
-            // Aggiungi un listener di clic al marker per rendere cliccabile
-            marker.getElement().addEventListener('click', function() {
-                // Reindirizza alla pagina dei dettagli del punto usando il percorso completo
-                window.location.href = '/api/dettaglio/' + point.id + '/';
-});
+        // Inizializza la mappa ottimizzata
+        var map2 = new mapboxgl.Map({
+            container: 'map2',
+            style: 'mapbox://styles/mapbox/dark-v10',
+            center: [10.5003, 45.3876],
+            zoom: 12
         });
 
-        // Aggiungi la rotta attuale in blu
+        // Aggiungi il controllo per il confronto
+        var compare = new mapboxgl.Compare(map1, map2, '#map-container', {});
+
+        // Aggiungi i controlli di navigazione
+        map1.addControl(new mapboxgl.NavigationControl());
+        map2.addControl(new mapboxgl.NavigationControl());
+
+        // Aggiungi i punti a entrambe le mappe
+        var points = {{ points|safe }};
+        points.forEach(function(point) {
+            // Marker per la mappa corrente
+            var marker1 = new mapboxgl.Marker({ color: point.color })
+                .setLngLat([point.lon, point.lat])
+                .addTo(map1);
+            marker1.getElement().addEventListener('click', function() {
+                window.location.href = '/api/dettaglio/' + point.id + '/';
+            });
+
+            // Marker per la mappa ottimizzata
+            var marker2 = new mapboxgl.Marker({ color: point.color })
+                .setLngLat([point.lon, point.lat])
+                .addTo(map2);
+            marker2.getElement().addEventListener('click', function() {
+                window.location.href = '/api/dettaglio/' + point.id + '/';
+            });
+        });
+
+        // Aggiungi la rotta attuale alla mappa corrente
         var currentRouteCoords = {{ current_route_coords|safe }};
-        map.on('load', function () {
-            map.addSource('currentRoute', {
+        map1.on('load', function () {
+            map1.addSource('currentRoute', {
                 'type': 'geojson',
                 'data': {
                     'type': 'Feature',
                     'geometry': {
                         'type': 'LineString',
                         'coordinates': currentRouteCoords.map(function(coord) {
-                            return [coord[1], coord[0]]; // Invertire lat e lon
+                            return [coord[1], coord[0]];
                         })
                     }
                 }
             });
 
-            map.addLayer({
+            map1.addLayer({
                 'id': 'currentRoute',
                 'type': 'line',
                 'source': 'currentRoute',
@@ -70,23 +165,25 @@
                     'line-width': 4
                 }
             });
+        });
 
-            // Aggiungi la rotta ottimizzata in rosso
-            var optimizedRouteCoords = {{ optimized_route_coords|safe }};
-            map.addSource('optimizedRoute', {
+        // Aggiungi la rotta ottimizzata alla mappa ottimizzata
+        var optimizedRouteCoords = {{ optimized_route_coords|safe }};
+        map2.on('load', function () {
+            map2.addSource('optimizedRoute', {
                 'type': 'geojson',
                 'data': {
                     'type': 'Feature',
                     'geometry': {
                         'type': 'LineString',
                         'coordinates': optimizedRouteCoords.map(function(coord) {
-                            return [coord[1], coord[0]]; // Invertire lat e lon
+                            return [coord[1], coord[0]];
                         })
                     }
                 }
             });
 
-            map.addLayer({
+            map2.addLayer({
                 'id': 'optimizedRoute',
                 'type': 'line',
                 'source': 'optimizedRoute',
