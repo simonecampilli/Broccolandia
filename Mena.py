@@ -7,7 +7,7 @@ from geopy.distance import geodesic
 from scipy.spatial.distance import pdist, squareform
 
 # 1. Read the Excel file
-df = pd.read_excel('/Users/michelemenabeni/PycharmProjects/AQA/Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx')
+df = pd.read_excel('Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx')
 df = df.dropna(subset=['Latitude', 'Longitude'])
 
 # 2. Function to calculate the distance between two coordinates
@@ -17,16 +17,16 @@ def calcola_distanza(coord1, coord2):
 # 3. Create the data model for the VRP
 def create_data_model(group):
     # Depot coordinates
-    punto0 = [[45.1554427, 10.7978819]]
+    #punto0 = [[45.1554427, 10.7978819]]
     punti = group[['Latitude', 'Longitude']].values
     # Add the depot to the list of points
-    punti = np.vstack([punto0, punti])
+    #punti = np.vstack([punto0, punti])
     data = {}
     # Calculate the geodesic distance matrix (in km)
     dist_matrix = squareform(pdist(punti, lambda u, v: geodesic(u, v).kilometers))
     # Convert distances to meters and cast to integers
     data['distance_matrix'] = (dist_matrix * 1000).astype(int)
-    data['num_vehicles'] = 5
+    data['num_vehicles'] = 1
     data['depot'] = 0
     return data
 
@@ -55,7 +55,7 @@ def calcola_percorsi(group):
     # Setting first solution heuristic
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     search_parameters.first_solution_strategy = (
-        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+        routing_enums_pb2.FirstSolutionStrategy.GLOBAL_CHEAPEST_ARC
     )
     # Set a time limit (in seconds)
     search_parameters.time_limit.FromSeconds(30)
@@ -96,13 +96,14 @@ def print_solution(data, manager, routing, solution, gruppo):
 
 # 6. Function to compare current and proposed methods
 def calcola_primi_100_consumo_attuale(df1):
-    df1 = df1.head(500)
     punti = df1[['Latitude', 'Longitude']].values
     emissioni_totali = 0
     distanza = 0
     # Calculate emissions and distance for the current method
     for i in range(1, len(punti)):
+
         distanza_km = calcola_distanza(punti[i - 1], punti[i])
+        print(i, punti[i - 1], punti[i],distanza_km)
         emissioni_totali += distanza_km * 120 / 1000  # Emissions in kg
         distanza += distanza_km
     # Calculate emissions and distance for the proposed method
@@ -111,6 +112,15 @@ def calcola_primi_100_consumo_attuale(df1):
     emissioni_proposte = dist_prop_km * 120 / 1000  # Emissions in kg
     print('Metodo proposto:', emissioni_proposte, 'kg CO₂ per una distanza di km:', dist_prop_km)
     print('Metodo attuale:', emissioni_totali, 'kg CO₂ per una distanza di km:', distanza)
+df['Data Lettura'] = pd.to_datetime(df['Data Lettura'], errors='coerce', dayfirst=True)
 
+# Filter the DataFrame for rows where 'Data Lettura' is 02/05 (May 2nd)
+specific_date = '2024-05-02'  # Adjust the year if needed
+df_filtered = df[(df['Data Lettura'] == specific_date) & (df['Codice Letturista'] == 'LO0414')]
+df_sorted = df_filtered.sort_values(by='Ora Lettura')
+# Group by the 'Data Lettura' column (though this will contain only one group now)
+#gruppi = df_filtered.groupby(['Data Lettura'])
 # 7. Execute the comparison
-calcola_primi_100_consumo_attuale(df)
+#gruppi=df.groupby(['Data Lettura'])
+#for (data),gruppo in gruppi:
+calcola_primi_100_consumo_attuale(df_sorted)

@@ -9,7 +9,7 @@ def sort_tensor_by_x1(data, cls):
 
     return sorted_cls
 def detect_numbers(img):
-    model = YOLO('best.pt')
+    model = YOLO('menameter.pt')
     image_path = img
 
     result_obj_det = model(image_path)

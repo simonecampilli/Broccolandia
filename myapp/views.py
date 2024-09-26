@@ -181,7 +181,7 @@ def map(request):
         lon_min, lon_max = 10.7714, 10.8114  # Limiti per la longitudine
 
         points = []
-        df = pd.read_excel('/Users/michelemenabeni/PycharmProjects/AQA/Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx')
+        df = pd.read_excel('Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx')
         print(df.columns)
         df=df.head(1000)
         df = df.dropna(subset=['Latitude', 'Longitude'])
