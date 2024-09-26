@@ -264,9 +264,9 @@ def import_user_data(request):
                         latitude=row['Latitude'],
                         longitude=row['Longitude'],
                         altitude=row.get('Altitude', None),
-                        lettura1=1,
-                        lettura2=2,
-                        lettura3=3,
+                        lettura1=None,
+                        lettura2=None,
+                        lettura3=None,
                         link_map=row.get('Link Map', None)
                     )
                     user_data.save()
@@ -282,7 +282,7 @@ def import_user_data(request):
         return HttpResponse("Data import completed successfully!")
     except Exception as e:
         return HttpResponse(f"An error occurred: {e}")
-'''
+
 import os
 import torch
 from django.conf import settings
@@ -315,16 +315,41 @@ def detect_numbers(img):
         # Estrai il percorso relativo per l'uso nel template
         rel_save_path = os.path.join(settings.MEDIA_URL, 'yolo', os.path.basename(img))
         numbers = sort_tensor_by_x1(boxes.data, boxes.cls)
-        return numbers, rel_save_path
+        print(numbers)
+        # Converti il tensore in una lista di interi, quindi in una stringa di cifre
+        number_str = ''.join([str(int(num)) for num in numbers])
+
+
+
+
+        print(number_str)
+        return number_str, rel_save_path
     else:
         return "ErrorImage", None
 
-def detection_view(request):
-    directory = os.path.join(settings.MEDIA_ROOT, 'testProva')
-    results = []
-    for image in os.listdir(directory):
-        numbers, image_path = detect_numbers(os.path.join(directory, image))
-        results.append((image, numbers, image_path))
-    return render(request, 'results.html', {'results': results})
 
-'''
+from django.shortcuts import render
+from .models import UserData  # Assicurati che il modello sia importato correttamente
+
+
+def detection_view(request):
+    # Filtra i dati per flag=True e immagine esistente
+    user_data_list = UserData.objects.filter(flag=True).exclude(image='')
+
+    results = []
+    for user_data in user_data_list:
+        image_path = user_data.image.path
+        numbers, rel_image_path = detect_numbers(image_path)
+
+        if numbers != "ErrorImage":
+            # Assumendo che numbers sia una lista o un tensore e tu voglia salvare un valore specifico in lettura1
+            # Ad esempio, potresti voler salvare il primo numero rilevato o una aggregazione specifica
+            user_data.lettura1 = numbers if len(
+                numbers) > 0 else None  # Assicurati che numbers[0] sia un intero o convertilo
+            user_data.save()
+
+        # Aggiungi al risultato
+        results.append((user_data, numbers, rel_image_path))
+
+    # Renderizza i risultati nella pagina HTML
+    return render(request, 'results.html', {'results': results})
