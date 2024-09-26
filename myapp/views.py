@@ -206,7 +206,11 @@ def map(request):
     context = {
         'points': points,
         'current_route_coords': current_route_coords,
-        'optimized_route_coords': optimized_route_coords
+        'optimized_route_coords': optimized_route_coords,
+        'emissioni_correnti': emissioni_correnti,
+        'emissioni_proposta': emissioni_proposta,
+        'distanza_corrente': distanza_corrente,
+        'distanza_proposta': distanza_proposta
     }
 
     return render(request, 'map.html', context)
