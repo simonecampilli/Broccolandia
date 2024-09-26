@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- Meta tag necessari -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dettagli del Punto</title>
+  <!-- Link CSS di Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+  <div class="container mt-5">
+    <div class="card">
+      <div class="card-header text-center bg-primary text-white">
+        <h2>Dettagli del Punto</h2>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Dati Localizzazione -->
+          <div class="col-md-6">
+            <h4 class="mb-3">Dati Localizzazione</h4>
+            <p><strong>Comune:</strong> {{ entry.comune }}</p>
+            <p><strong>Indirizzo:</strong> {{ entry.indirizzo }} {{ entry.civ }}</p>
+            <p><strong>Latitudine:</strong> {{ entry.latitude }}</p>
+            <p><strong>Longitudine:</strong> {{ entry.longitude }}</p>
+            <p><strong>Altitudine:</strong> {{ entry.altitude }}</p>
+            <a href="{{ entry.link_map }}" target="_blank" class="btn btn-outline-primary mt-2">Visualizza sulla Mappa</a>
+          </div>
+          <!-- Dati Lettura -->
+          <div class="col-md-6">
+            <h4 class="mb-3">Dati Lettura</h4>
+            <p><strong>Codice Letturista:</strong> {{ entry.codice_letturista }}</p>
+            <p><strong>Data Lettura:</strong> {{ entry.data_lettura }}</p>
+            <p><strong>Ora Lettura:</strong> {{ entry.ora_lettura }}</p>
+            <p><strong>Lettura 1:</strong> {{ entry.lettura1 }}</p>
+            <p><strong>Lettura 2:</strong> {{ entry.lettura2 }}</p>
+            <p><strong>Lettura 3:</strong> {{ entry.lettura3 }}</p>
+            <p><strong>Flag:</strong> {{ entry.flag }}</p>
+            {% if entry.image %}
+              <div class="mt-4">
+                <h5>Immagine</h5>
+                <img src="{{ entry.image.url }}" alt="Immagine di {{ entry.comune }}" class="img-fluid rounded">
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script JS di Bootstrap e dipendenze -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

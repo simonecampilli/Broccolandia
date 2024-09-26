@@ -185,23 +185,24 @@ def map(request):
 
     # Converte il queryset in un DataFrame
     df = pd.DataFrame(list(queryset))
-    df_ok = df[df['flag'] !=True].sort_values(by='data_lettura')
+    df_ok = df[df['flag'] != True].sort_values(by='data_lettura')
     print(df_ok)
-    current_route_coords,optimized_route_coords,emissioni_correnti,emissioni_proposta,distanza_corrente,distanza_proposta = calcola_primi_100_consumo_attuale(df_ok)
 
-    # Fetch all entries from the UserData model
-    user_data_entries = UserData.objects.all()
+    # Calcola le prime 100 letture del consumo attuale (puoi adattare questa parte in base alle tue esigenze)
+    current_route_coords, optimized_route_coords, emissioni_correnti, emissioni_proposta, distanza_corrente, distanza_proposta = calcola_primi_100_consumo_attuale(df_ok)
+
+    # Prepara i punti da passare al template
     points = []
-    # Prepare points to pass to the template
-    for entry in user_data_entries:
+    for entry in UserData.objects.all():
         color = 'green' if entry.flag else 'red'
         points.append({
+            "id": entry.id,  # Include l'ID per rendere il punto cliccabile
             "lat": entry.latitude,
             "lon": entry.longitude,
             "color": color
         })
 
-        # Passiamo anche le coordinate delle rotte
+    # Passa i dati al template
     context = {
         'points': points,
         'current_route_coords': current_route_coords,
@@ -210,7 +211,17 @@ def map(request):
 
     return render(request, 'map.html', context)
 
+from django.shortcuts import render, get_object_or_404
+def dettaglio(request, id):
+    # Recupera l'entry dal modello UserData o restituisce un errore 404 se non esiste
+    entry = get_object_or_404(UserData, id=id)
 
+    # Passa l'entry al template
+    context = {
+        'entry': entry
+    }
+
+    return render(request, 'dettaglio.html', context)
 
 # views.py
 from django.shortcuts import render, redirect
