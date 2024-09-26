@@ -178,31 +178,31 @@ class UserDataCreateAPIView(generics.CreateAPIView):
         # Ritorna True se lo script è un successo, False altrimenti
         return True  # O la logica reale del tuo script
 
-
 def map(request):
-    # Ottieni tutti i dati dal modello UserData
+    # Fetch all data from UserData model
     queryset = UserData.objects.all().values()
-
-    # Converte il queryset in un DataFrame
     df = pd.DataFrame(list(queryset))
     df_ok = df[df['flag'] != True].sort_values(by='data_lettura')
-    print(df_ok)
 
-    # Calcola le prime 100 letture del consumo attuale (puoi adattare questa parte in base alle tue esigenze)
+    # Calculate the top 100 current consumption readings (adapt this part as needed)
     current_route_coords, optimized_route_coords, emissioni_correnti, emissioni_proposta, distanza_corrente, distanza_proposta = calcola_primi_100_consumo_attuale(df_ok)
 
-    # Prepara i punti da passare al template
+    # Ensure coordinates are in the correct format
+    current_route_coords = [list(coord) for coord in current_route_coords]  # Ensure list format
+    optimized_route_coords = [list(coord) for coord in optimized_route_coords]  # Convert NumPy arrays to lists
+
+    # Prepare the points to pass to the template
     points = []
     for entry in UserData.objects.all():
-        color = 'green' if entry.flag else 'red'
+        color = 'green' if not entry.flag else 'red'
         points.append({
-            "id": entry.id,  # Include l'ID per rendere il punto cliccabile
+            "id": entry.id,  # Include ID to make the point clickable
             "lat": entry.latitude,
             "lon": entry.longitude,
             "color": color
         })
 
-    # Passa i dati al template
+    # Pass the data to the template
     context = {
         'points': points,
         'current_route_coords': current_route_coords,
