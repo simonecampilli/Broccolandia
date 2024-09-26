@@ -3,34 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Map with Points</title>
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
+    <title>Map View with Mapbox</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; }
-        #map { width: 100%; height: 100vh; }
+        #map { width: 100%; height: 600px; }
     </style>
 </head>
 <body>
     <div id="map"></div>
 
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
     <script>
-        mapboxgl.accessToken = 'pk.eyJ1IjoibWlraW1lbmEwMSIsImEiOiJjbTBsNmVuZTUwMmhzMmtzN3AycmhtZTV6In0.Vq9BcjFL6SLom-YwELw19w'; // Sostituisci con la tua chiave API Mapbox
+        // Access token
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWlraW1lbmEwMSIsImEiOiJjbTBsNmVuZTUwMmhzMmtzN3AycmhtZTV6In0.Vq9BcjFL6SLom-YwELw19w';
+
+        // Inizializza la mappa
         var map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [10.8114, 45.1376], // Centro su Milano
-            zoom: 13
+            style: 'mapbox://styles/mapbox/streets-v11', 
+            center: [9.191383, 45.464211], // Centra sulla posizione iniziale
+            zoom: 12
         });
 
+        // Aggiungi i punti alla mappa
         var points = {{ points|safe }};
-
         points.forEach(function(point) {
-            var marker = new mapboxgl.Marker({
-                color: point.color
-            })
-            .setLngLat([point.lon, point.lat])
-            .addTo(map);
+            // Crea un marker per ogni punto
+            new mapboxgl.Marker({ color: point.color })
+                .setLngLat([point.lon, point.lat])
+                .addTo(map);
+        });
+
+        // Aggiungi la rotta attuale in blu
+        var currentRouteCoords = {{ current_route_coords|safe }};
+        map.on('load', function () {
+            map.addSource('currentRoute', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': currentRouteCoords.map(function(coord) {
+                            return [coord[1], coord[0]]; // Invertire lat e lon
+                        })
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'currentRoute',
+                'type': 'line',
+                'source': 'currentRoute',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#0000ff',
+                    'line-width': 4
+                }
+            });
+
+            // Aggiungi la rotta ottimizzata in rosso
+            var optimizedRouteCoords = {{ optimized_route_coords|safe }};
+            map.addSource('optimizedRoute', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': optimizedRouteCoords.map(function(coord) {
+                            return [coord[1], coord[0]]; // Invertire lat e lon
+                        })
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'optimizedRoute',
+                'type': 'line',
+                'source': 'optimizedRoute',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#ff0000',
+                    'line-width': 4
+                }
+            });
         });
     </script>
 </body>

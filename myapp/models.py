@@ -1,14 +1,26 @@
 from django.conf import settings
 from django.db import models
 
+# models.py
+from django.db import models
+
 class UserData(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    username = models.CharField(max_length=100)
-    image = models.ImageField(upload_to='images/')
+    comune = models.CharField(max_length=255)
+    indirizzo = models.CharField(max_length=255)
+    civ = models.CharField(max_length=50, blank=True, null=True)
+    codice_letturista = models.CharField(max_length=50)
+    data_lettura = models.DateField()
+    ora_lettura = models.TimeField()
     latitude = models.FloatField()
     longitude = models.FloatField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-    reading = models.IntegerField(blank=True, null=True)
+    altitude = models.FloatField(blank=True, null=True)
+    lettura1 = models.IntegerField(blank=True, null=True)
+    lettura2 = models.IntegerField(blank=True, null=True)
+    lettura3 = models.IntegerField(blank=True, null=True)
+    link_map = models.URLField(max_length=500, blank=True, null=True)
+    flag = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.username
+        return f"{self.comune} - {self.indirizzo}"
+
+

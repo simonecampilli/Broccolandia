@@ -1,8 +1,11 @@
 import random
 
 import pandas as pd
+from django.db import transaction
 from django.http import JsonResponse
 from rest_framework import viewsets
+
+from provaconmapbox import calcola_primi_100_consumo_attuale
 from .models import UserData
 from .serializers import UserDataSerializer
 
@@ -177,18 +180,90 @@ class UserDataCreateAPIView(generics.CreateAPIView):
 
 
 def map(request):
-        lat_min, lat_max = 45.1376, 45.1776  # Limiti per la latitudine
-        lon_min, lon_max = 10.7714, 10.8114  # Limiti per la longitudine
+    # Ottieni tutti i dati dal modello UserData
+    queryset = UserData.objects.all().values()
 
-        points = []
-        df = pd.read_excel('Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx')
-        print(df.columns)
-        df=df.head(1000)
-        df = df.dropna(subset=['Latitude', 'Longitude'])
-        for index,row in df.iterrows():
-            #lat = random.uniform(lat_min, lat_max)
-            #lon = random.uniform(lon_min, lon_max)
-            color = random.choice(["red", "green"])  # Colore casuale tra rosso e verde
-            points.append({"lat": row['Latitude'], "lon": row['Longitude'], "color": color})
-        return render(request,'map.html',{'points':points})
+    # Converte il queryset in un DataFrame
+    df = pd.DataFrame(list(queryset))
+    df_ok = df[df['flag'] !=True].sort_values(by='data_lettura')
+    print(df_ok)
+    current_route_coords,optimized_route_coords=calcola_primi_100_consumo_attuale(df_ok)
 
+    # Fetch all entries from the UserData model
+    user_data_entries = UserData.objects.all()
+    points = []
+    # Prepare points to pass to the template
+    for entry in user_data_entries:
+        color = 'green' if entry.flag else 'red'
+        points.append({
+            "lat": entry.latitude,
+            "lon": entry.longitude,
+            "color": color
+        })
+
+        # Passiamo anche le coordinate delle rotte
+    context = {
+        'points': points,
+        'current_route_coords': current_route_coords,
+        'optimized_route_coords': optimized_route_coords
+    }
+
+    return render(request, 'map.html', context)
+
+
+
+# views.py
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+import pandas as pd
+from .models import UserData  # Make sure 'UserData' model is correctly imported
+
+def import_user_data(request):
+    try:
+        # Path to the Excel file
+        file_path = 'Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx'
+        df = pd.read_excel(file_path, sheet_name='Letture')
+
+        # Convert columns to appropriate data types
+        df['Data Lettura'] = pd.to_datetime(df['Data Lettura'], errors='coerce', dayfirst=True)
+        df['Ora Lettura'] = pd.to_datetime(df['Ora Lettura'], format='%H:%M', errors='coerce').dt.time
+
+        specific_date = '2024-05-06'
+        df_filtered = df[(df['Data Lettura'] == specific_date) & (df['Codice Letturista'] == 'LO0414')]
+        print(df_filtered)
+        if df_filtered.empty:
+            return HttpResponse("No matching data found for the specified criteria.")
+
+        df_sorted = df_filtered.sort_values(by='Ora Lettura')
+
+        with transaction.atomic():
+            for _, row in df_sorted.iterrows():
+                try:
+                    user_data = UserData(
+                        comune=row['Comune'],
+                        indirizzo=row['Indirizzo'],
+                        civ=row.get('Civ', None),
+                        codice_letturista=row['Codice Letturista'],
+                        data_lettura=row['Data Lettura'],
+                        ora_lettura=row['Ora Lettura'],
+                        latitude=row['Latitude'],
+                        longitude=row['Longitude'],
+                        altitude=row.get('Altitude', None),
+                        lettura1=1,
+                        lettura2=2,
+                        lettura3=3,
+                        link_map=row.get('Link Map', None)
+                    )
+                    user_data.save()
+                    if user_data.pk:
+                        print(f"Saved entry: {user_data}")
+                    else:
+                        print("Save failed")
+
+                except Exception as e:
+                    print(f"Error saving entry: {e}")
+                    return HttpResponse(f"Error saving entry: {e}")
+
+        return HttpResponse("Data import completed successfully!")
+    except Exception as e:
+        return HttpResponse(f"An error occurred: {e}")

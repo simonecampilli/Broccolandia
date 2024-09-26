@@ -11,8 +11,8 @@ from mapboxgl.viz import LinestringViz
 import os
 
 # 1. Read the Excel file
-df = pd.read_excel('Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx')
-df = df.dropna(subset=['Latitude', 'Longitude'])
+#df = pd.read_excel('Report_Complessivo_AqA_blocco35_Apr.mag.24.xlsx')
+#df = df.dropna(subset=['latitude', 'longitude'])
 
 # 2. Function to calculate the distance between two coordinates
 def calcola_distanza(coord1, coord2):
@@ -20,7 +20,7 @@ def calcola_distanza(coord1, coord2):
 
 # 3. Create the data model for the VRP
 def create_data_model(group):
-    punti = group[['Latitude', 'Longitude']].values
+    punti = group[['latitude', 'longitude']].values
     # Add the depot to the list of points
     data = {}
     # Calculate the geodesic distance matrix (in km)
@@ -98,14 +98,14 @@ def print_solution(data, manager, routing, solution, gruppo):
         print(plan_output)
         total_distance += route_distance
         # Get coordinates from route
-        coords = gruppo[['Latitude', 'Longitude']].values
+        coords = gruppo[['latitude', 'longitude']].values
         route_coords = [coords[i] for i in route]
     print(f"Total distance of all routes: {total_distance / 1000:.2f} km")
     return total_distance, route_coords
 
 # 6. Function to compare current and proposed methods
 def calcola_primi_100_consumo_attuale(df1):
-    punti = df1[['Latitude', 'Longitude']].values
+    punti = df1[['latitude', 'longitude']].values
     emissioni_totali = 0
     distanza = 0
     current_route_coords = punti.tolist()
@@ -123,7 +123,7 @@ def calcola_primi_100_consumo_attuale(df1):
     print('Metodo attuale:', emissioni_totali, 'kg CO₂ per una distanza di km:', distanza)
 
     # Plot the routes
-    plot_routes(current_route_coords, optimized_route_coords)
+    return current_route_coords, optimized_route_coords
 
 # 7. Function to plot the routes using Mapbox
 def plot_routes(current_route_coords, optimized_route_coords):
@@ -190,17 +190,16 @@ def plot_routes(current_route_coords, optimized_route_coords):
     with open('current_route.html', 'w', encoding='utf-8') as f:
         f.write(current_route_html)
 
-    with open('optimized_route.html', 'w', encoding='utf-8') as f:
+    with open('optimized_2route.html', 'w', encoding='utf-8') as f:
         f.write(optimized_route_html)
 
 
 # Main execution
-df['Data Lettura'] = pd.to_datetime(df['Data Lettura'], errors='coerce', dayfirst=True)
+#df['Data Lettura'] = pd.to_datetime(df['Data Lettura'], errors='coerce', dayfirst=True)
 # Filter the DataFrame for rows where 'Data Lettura' is 02/05 (May 2nd)
-specific_date = '2024-05-06'  # Adjust the year if needed
-df_filtered = df[(df['Data Lettura'] == specific_date) & (df['Codice Letturista'] == 'LO0414')]
-df_sorted = df_filtered.sort_values(by='Ora Lettura')
-for index, row in df_sorted.head(3).iterrows():
-    print(row)
+#specific_date = '2024-05-06'  # Adjust the year if needed
+#df_filtered = df[(df['Data Lettura'] == specific_date) & (df['Codice Letturista'] == 'LO0414')]
+#df_sorted = df_filtered.sort_values(by='Ora Lettura')
+
 # Execute the comparison
-calcola_primi_100_consumo_attuale(df_sorted)
+#calcola_primi_100_consumo_attuale(df_sorted)
