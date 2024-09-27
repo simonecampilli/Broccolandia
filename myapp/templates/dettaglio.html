@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <!-- Meta tag necessari -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dettagli del Punto</title>
-  <!-- Link CSS di Bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+   <style>
+       
+   </style>
 </head>
 <body>
-
+<!-- Navbar -->
+  <!-- Navbar -->
+    
   <div class="container mt-5">
     <div class="card">
       <div class="card-header text-center bg-primary text-white">
@@ -25,8 +28,19 @@
             <p><strong>Latitudine:</strong> {{ entry.latitude }}</p>
             <p><strong>Longitudine:</strong> {{ entry.longitude }}</p>
             <p><strong>Altitudine:</strong> {{ entry.altitude }}</p>
-            <a href="{{ entry.link_map }}" target="_blank" class="btn btn-outline-primary mt-2">Visualizza sulla Mappa</a>
+            
+            <!-- Verifica se link_map è presente -->
+            {% if entry.link_map %}
+              <a href="{{ entry.link_map }}" target="_blank" class="btn btn-outline-primary mt-2">Visualizza sulla Mappa</a>
+            {% else %}
+              <p class="text-muted mt-2">Mappa non disponibile</p>
+            {% endif %}
+          <!-- Pulsante per tornare alla mappa -->
+    <div class="mb-3">
+      <a href="{% url 'map' %}" class="btn btn-secondary">Torna alla Mappa</a>
           </div>
+          </div>
+          
           <!-- Dati Lettura -->
           <div class="col-md-6">
             <h4 class="mb-3">Dati Lettura</h4>
@@ -43,7 +57,7 @@
                 <img src="{{ entry.image.url }}" alt="Immagine di {{ entry.comune }}" class="img-fluid rounded">
               </div>
             {% endif %}
-          </div>
+           
         </div>
       </div>
     </div>

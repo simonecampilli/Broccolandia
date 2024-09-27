@@ -12,7 +12,7 @@ router.register(r'userdata', UserDataViewSet)
 
 urlpatterns = [
 
-    path('get_map',views.map,name='map'),
+    path('',views.map,name='map'),
     path('import-data/', views.import_user_data, name='import_user_data'),
     path('', include(router.urls)),
     #path('create/', UserDataCreate.as_view(), name='create-userdata'),
